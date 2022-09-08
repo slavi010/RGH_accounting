@@ -3,6 +3,8 @@
 
 import sys
 
+import pandas as pd
+
 sys.path.append('../')
 
 from enum import Enum
@@ -36,9 +38,20 @@ class ColumnResultStrategy(str, Enum):
     index_column = "index_column"
 
 
+def convert_xlsb_to_xlsx(input_file):
+    """
+    Convert xlsb to xlsx.
+    :param input_file: xlsb file
+    :return: xlsx file
+    """
+    # use pandas to convert xlsb to xlsx
+    df = pd.read_excel(input_file, engine='pyxlsb')
+    df.to_excel(input_file.replace('.xlsb', '.xlsx'), index=False)
+
+
 @app.command()
 def table_import(
-        input_file: str = typer.Argument(..., help="Input file (.xlsx)"),
+        input_file: str = typer.Argument(..., help="Input file (.xlsx or .xlsb)"),
         output_file: Optional[str] = typer.Option(None, "--output", "-o",
                                                   help="Output file (.xlsx). "
                                                        "If not specified, the input file will be overwritten. "
@@ -135,6 +148,14 @@ def table_import(
         raise ValueError("--row_start_index must be greater than 0")
     if verbose < 0 or verbose > 2:
         raise ValueError("--verbose must be between 0 and 2")
+
+    # if the file is xlsb, convert it to xlsx
+    if input_file.endswith(".xlsb"):
+        convert_xlsb_to_xlsx(input_file)
+        input_file = input_file.replace(".xlsb", ".xlsx")
+        RichConsole.info(f"Converted {input_file} to {input_file}")
+
+
 
     # Read the input file
     main_spinner_task = RichConsole.one_shot_task("Opening file")
