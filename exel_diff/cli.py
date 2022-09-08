@@ -1,13 +1,17 @@
 # Author : Sviatoslav Besnard pro@slavi.dev
 # Created at: 2022-08-09
 
+import sys
+
+sys.path.append('../')
+
 from enum import Enum
 from typing import Optional
 import regex as re
 
 import typer
 
-from utils import RichConsole
+from utils.utils import RichConsole
 
 import openpyxl as xl
 
@@ -33,8 +37,6 @@ class ColumnResultStrategy(str, Enum):
 
 
 @app.command()
-
-@app.command("no_interactive")
 def table_import(
         input_file: str = typer.Argument(..., help="Input file (.xlsx)"),
         output_file: Optional[str] = typer.Option(None, "--output", "-o",
@@ -85,6 +87,10 @@ def table_import(
                                                           help="Column index to store the result (start from 1). "
                                                                "Must be used with --col_result index_column.\n"
                                                                "Usage: `--col_result index_column --col_result_index 42`"),
+        partition_column_index: Optional[int] = typer.Option(None, "--partition_column_index", "--part_col_idx",
+                                                             help="Column index to partition rows (start from 1). "
+                                                                  "If not specified, the whole sheet is processed in on block.\n"
+                                                                  "Usage: `--part_col_idx 5`"),
         author: bool = typer.Option(False, "--author", "-a",
                                     help="Print author information and exist.\n"
                                          "Full usage: `python cli.py a -a`"),
@@ -211,12 +217,18 @@ def table_import(
                     break
                 elif row_stop_strategy == RowStopStrategy.end_of_tab:
                     continue
-            if abs(cell.value) not in hash_map:
-                hash_map[abs(cell.value)] = {"+": [], "-": []}
+
+            partition_value = ""
+            if partition_column_index is not None:
+                partition_value = sheet.cell(row=cell.row, column=partition_column_index).value
+
+            v = str(abs(cell.value)) + partition_value
+            if v not in hash_map:
+                hash_map[v] = {"+": [], "-": []}
             if cell.value < 0:
-                hash_map[abs(cell.value)]["-"].append(cell)
+                hash_map[v]["-"].append(cell)
             else:
-                hash_map[abs(cell.value)]["+"].append(cell)
+                hash_map[v]["+"].append(cell)
 
         # Result column
         index_column_result = None
