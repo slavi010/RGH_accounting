@@ -1,2 +1,4 @@
 typer[all]
 openpyxl
+pandas
+pyxlsb
