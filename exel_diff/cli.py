@@ -32,7 +32,9 @@ class ColumnResultStrategy(str, Enum):
     index_column = "index_column"
 
 
-@app.command("tabs")
+@app.command()
+
+@app.command("no_interactive")
 def table_import(
         input_file: str = typer.Argument(..., help="Input file (.xlsx)"),
         output_file: Optional[str] = typer.Option(None, "--output", "-o",
@@ -202,10 +204,10 @@ def table_import(
         for cell in sheet.iter_rows(min_row=row_start_index, max_row=sheet.max_row, min_col=column_index_process,
                                     max_col=column_index_process):
             cell = cell[0]
+            if row_stop_strategy == RowStopStrategy.index_row and cell.row > row_stop_index:
+                break
             if cell.value is None or cell.value == "":
-                if row_stop_strategy == RowStopStrategy.index_row:
-                    break
-                elif row_stop_strategy == RowStopStrategy.on_nan:
+                if row_stop_strategy == RowStopStrategy.on_nan:
                     break
                 elif row_stop_strategy == RowStopStrategy.end_of_tab:
                     continue
