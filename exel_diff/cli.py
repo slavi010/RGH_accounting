@@ -274,11 +274,15 @@ def table_import(
 
                     cell_plus_result.value = idx
                     cell_minus_result.value = idx
+                    sheet.cell(cell_minus.row, column_index_process).fill = xl.styles.fills.PatternFill(patternType='solid', fgColor='008000')
+                    sheet.cell(cell_plus.row, column_index_process).fill = xl.styles.fills.PatternFill(patternType='solid', fgColor='008000')
+
                 elif len(cells["+"]) > index_identical_cell:
                     # leave the result cell empty if there is no cell for the minus
                     cell_plus = cells["+"][index_identical_cell]
                     cell_plus_result = sheet.cell(row=cell_plus.row, column=index_column_result)
                     cell_plus_result.value = None
+
                 elif len(cells["-"]) > index_identical_cell:
                     # leave the result cell empty if there is no cell for the plus
                     cell_minus = cells["-"][index_identical_cell]
@@ -286,6 +290,7 @@ def table_import(
                     cell_minus_result.value = None
 
         RichConsole.progress_bar.update(main_bar_task, advance=1)
+    sheet.cell(1, column_index_process + 1).value = "Matching Key"
     RichConsole.progress_bar.remove_task(main_bar_task)
     RichConsole.one_shot_task("Processing main job").end()
 
