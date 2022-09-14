@@ -9,7 +9,7 @@ sys.path.append('../')
 
 from enum import Enum
 from typing import Optional
-import regex as re
+import re
 
 import typer
 
