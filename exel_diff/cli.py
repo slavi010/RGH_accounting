@@ -54,8 +54,9 @@ def table_import(
         input_file: str = typer.Argument(..., help="Input file (.xlsx or .xlsb)"),
         output_file: Optional[str] = typer.Option(None, "--output", "-o",
                                                   help="Output file (.xlsx). "
-                                                       "If not specified, the input file will be overwritten. "
+                                                       "If not specified, create a new file. "
                                                        "Usage: `-o output.xlsx`"),
+
         tabs: list[str] = typer.Option([], "--tabs", "-t",
                                        help="Tab name to process, can be specified multiple times.\n"
                                             "Usage: `-t 'sheet 1'`"),
@@ -298,7 +299,7 @@ def table_import(
 
     # Save the result
     if output_file is None:
-        output_file = input_file
+        output_file = input_file[:-5] + "_cleared.xlsx"
     wb.save(output_file)
 
     main_spinner_task.end()
